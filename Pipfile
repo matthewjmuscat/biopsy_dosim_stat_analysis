@@ -5,6 +5,10 @@ name = "pypi"
 
 [packages]
 pandas = "*"
+scipy = "*"
+matplotlib = "*"
+seaborn = "*"
+pingouin = "*"
 
 [dev-packages]
 
