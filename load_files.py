@@ -53,3 +53,38 @@ def load_csv_as_dataframe(file_path):
     except Exception as e:
         print(f"Error loading file {file_path}: {e}")
         return None
+    
+
+def load_multiindex_csv(file_path, index_col=None, header_rows=None):
+    """
+    Loads a CSV file that may contain MultiIndex headers and/or indexes.
+    
+    Parameters:
+        file_path (str or Path): Path to the CSV file.
+        index_col (int, list of int, None): Column(s) to set as index. Use None if no index.
+        header_rows (list of int, int, None): Row(s) to use as header. Use a list for MultiIndex headers or None for no header.
+    
+    Returns:
+        pd.DataFrame: The loaded DataFrame with the correct MultiIndex structure.
+    """
+    file_path = Path(file_path)  # Ensures the file path is a Path object
+    if not file_path.is_file():
+        raise ValueError(f"The file '{file_path}' does not exist.")
+
+    # Attempt to load the DataFrame with specified index and header rows
+    try:
+        df = pd.read_csv(file_path, header=header_rows, index_col=index_col)
+        
+        # Check for 'Unnamed' columns in the DataFrame after loading
+        if any("Unnamed" in str(col) for col in df.columns.get_level_values(0)):  # Check in the first level
+            # Iterate through all levels of the MultiIndex columns
+            df.columns = pd.MultiIndex.from_tuples([
+                tuple("" if "Unnamed" in part else part for part in col)
+                for col in df.columns
+            ])
+            # Filter out completely empty columns (where all parts are '')
+            df = df.loc[:, ~df.columns.to_series().apply(lambda x: all(part == "" for part in x))]
+        
+        return df
+    except Exception as e:
+        raise Exception(f"Error loading file {file_path}: {e}")

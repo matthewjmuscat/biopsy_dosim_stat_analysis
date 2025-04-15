@@ -63,6 +63,8 @@ def calculate_wilcoxon_dataframe_all(dataframe, patient_id_col, bx_index_col, bx
                     except ValueError:
                         # Wilcoxon can fail if inputs are invalid (e.g., constant data)
                         continue
+                else:
+                    print(f'Wilcoxon failed for {voxel1}, {voxel2}')
     
     # Combine all results into a single DataFrame
     return pd.DataFrame(results)
